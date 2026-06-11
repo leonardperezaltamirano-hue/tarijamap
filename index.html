@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tarija MapTour - GPS y Rutas</title>
+    <title>Tarija MapTour Pro - GPS Activo</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
@@ -11,69 +11,73 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-        /* Ajustar el mapa al alto total disponible de la pantalla */
-        .alto-pantalla { height: calc(100vh - 56px); }
-        @media (min-width: 768px) { .alto-pantalla { height: calc(100vh - 64px); } }
-
-        /* Animación de pulso azul estilo Google Maps para el GPS */
+        .alto-pantalla { height: calc(100vh - 64px); }
+        
+        /* Animación de pulso GPS */
         .gps-pulso {
-            width: 14px;
-            height: 14px;
-            background-color: #2563eb;
-            border: 2px solid #fff;
+            width: 16px;
+            height: 16px;
+            background-color: #059669;
+            border: 3px solid #fff;
             border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
-            animation: pulso 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+            box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
+            animation: pulso 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
         }
         @keyframes pulso {
-            to { box-shadow: 0 0 0 12px rgba(37, 99, 235, 0); }
+            to { box-shadow: 0 0 0 16px rgba(5, 150, 105, 0); }
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans overflow-hidden">
+<body class="bg-gray-900 text-gray-100 font-sans overflow-hidden">
 
-    <nav class="bg-blue-700 text-white h-14 md:h-16 px-4 flex items-center justify-between shadow-md z-30 relative">
+    <nav class="bg-gray-800 h-16 px-4 flex items-center justify-between shadow-lg z-30 relative border-b border-gray-700">
         <div class="flex items-center gap-3">
-            <button onclick="toggleMenuLateral(true)" class="bg-blue-800 hover:bg-blue-900 text-white p-2 rounded-lg text-xl focus:outline-none transition active:scale-95 cursor-pointer" title="Abrir menú de rutas">
+            <button onclick="toggleMenuLateral(true)" class="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-xl text-xl transition active:scale-95 cursor-pointer">
                 ☰
             </button>
-            <h1 class="text-base md:text-xl font-bold tracking-wide">
-                🚌 Tarija MapTour
+            <h1 class="text-base md:text-lg font-bold tracking-wider text-emerald-400">
+                📍 TARIJA MAPTOUR <span class="text-xs text-gray-400 font-normal hidden sm:inline">| GPS Inteligente</span>
             </h1>
         </div>
-        <span class="text-[11px] md:text-sm bg-blue-600 px-3 py-1 rounded-full font-medium shadow-inner">📱 Pasajero</span>
+        <div id="estado-gps-barra" class="text-xs bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400">
+            📡 GPS: <span class="text-red-400 font-bold">Inactivo</span>
+        </div>
     </nav>
 
     <div class="relative flex alto-pantalla w-full overflow-hidden">
         
-        <aside id="menu-lateral" class="absolute top-0 bottom-0 left-0 w-72 md:w-80 bg-white shadow-[5px_0_25px_rgba(0,0,0,0.15)] z-40 flex flex-col transition-transform duration-300 transform -translate-x-full">
-            
-            <div class="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+        <aside id="menu-lateral" class="absolute top-0 bottom-0 left-0 w-72 md:w-80 bg-gray-800 shadow-2xl z-40 flex flex-col transition-transform duration-300 transform -translate-x-full border-r border-gray-700">
+            <div class="p-4 border-b border-gray-700 bg-gray-850 flex items-center justify-between">
                 <div>
-                    <h2 class="font-bold text-gray-800 text-base">Líneas de Micro</h2>
-                    <p class="text-[11px] text-gray-500">Selecciona para ver la ruta</p>
+                    <h2 class="font-bold text-white text-base">Líneas de Transporte</h2>
+                    <p class="text-[11px] text-emerald-400 font-medium">Filtro de recorridos activos</p>
                 </div>
-                <button onclick="toggleMenuLateral(false)" class="text-gray-400 hover:text-gray-600 text-xl p-1 rounded-lg focus:outline-none cursor-pointer" title="Cerrar menú">
-                    ✕
-                </button>
+                <button onclick="toggleMenuLateral(false)" class="text-gray-400 hover:text-white text-xl p-1 rounded-lg cursor-pointer">✕</button>
             </div>
 
-            <div id="lista-rutas-usuario" class="p-4 flex-grow overflow-y-auto space-y-2.5 bg-white">
+            <div id="lista-rutas-usuario" class="p-4 flex-grow overflow-y-auto space-y-3 bg-gray-800">
                 </div>
 
-            <div class="p-4 border-t border-gray-200 bg-gray-50">
-                <label class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer text-center shadow-md active:scale-98">
-                    📥 Añadir Más Rutas (.json)
+            <div class="p-4 bg-gray-900 border-t border-gray-700 space-y-2">
+                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Asistente de Cercanía</span>
+                <div id="telemetria-distancia" class="text-xs text-gray-300 bg-gray-800 p-2.5 rounded-lg border border-gray-700 italic">
+                    Selecciona una ruta y enciende tu GPS para calcular la parada más cercana.
+                </div>
+            </div>
+
+            <div class="p-4 bg-gray-850 border-t border-gray-700">
+                <label class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer text-center shadow-lg active:scale-98">
+                    📥 Cargar Variante (.json)
                     <input type="file" accept=".json" class="hidden" onchange="importarNuevasRutasJSON(event)">
                 </label>
             </div>
         </aside>
 
-        <div id="capa-oscura" onclick="toggleMenuLateral(false)" class="absolute inset-0 bg-black/40 z-30 hidden transition-opacity duration-300 opacity-0"></div>
+        <div id="capa-oscura" onclick="toggleMenuLateral(false)" class="absolute inset-0 bg-black/60 z-30 hidden transition-opacity duration-300 opacity-0"></div>
 
-        <div id="map" class="z-10 flex-grow w-full h-full relative">
+        <div id="map" class="z-10 flex-grow w-full h-full relative bg-gray-950">
             
-            <button id="btn-gps" class="absolute bottom-6 right-4 z-20 bg-white hover:bg-gray-100 text-gray-700 p-3.5 rounded-full shadow-2xl border border-gray-200 focus:outline-none transition-transform active:scale-95 text-xl" onclick="alternarLocalizacionGPS()" title="Mostrar mi ubicación actual">
+            <button id="btn-gps" class="absolute bottom-6 right-4 z-20 bg-gray-800 hover:bg-gray-700 text-white w-14 h-14 rounded-full shadow-2xl border border-gray-700 focus:outline-none transition-all active:scale-95 text-2xl flex items-center justify-center cursor-pointer" onclick="alternarLocalizacionGPS()" title="Rastreo en tiempo real">
                 🎯
             </button>
             
@@ -82,21 +86,21 @@
     </div>
 
     <script>
-        // 1. Inicializar el mapa centrado en Tarija
+        // Inicializar mapa con un estilo oscuro/diseño urbano elegante (CartoDB DarkMatter)
         const tarijaCoords = [-21.53549, -64.72856];
         const map = L.map('map', { zoomControl: false }).setView(tarijaCoords, 14);
         
         L.control.zoom({ position: 'topright' }).addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap & CartoDB'
         }).addTo(map);
 
-        // 2. Base de Datos incrustada (Tus datos JSON guardados de forma segura)
+        // Base de Datos Nativa
         let sistemaRutasGlobal = [
             {
-                "id": "linea_1781183102503",
-                "nombre": "Micro A",
+                "id": "linea_A",
+                "nombre": "Micro Línea A",
                 "color": "#3b82f6",
                 "trazado": [
                     [-21.542174168753746, -64.70826294340675], [-21.531961893333236, -64.71873062022466],
@@ -112,9 +116,9 @@
                 "capaLinea": null, "grupoParadas": null
             },
             {
-                "id": "linea_1781183179965",
-                "nombre": "Micro B",
-                "color": "#f73b3b",
+                "id": "linea_B",
+                "nombre": "Micro Línea B",
+                "color": "#ef4444",
                 "trazado": [
                     [-21.546081181000005, -64.70002379848945], [-21.538023334100785, -64.69659177330324],
                     [-21.535869180443832, -64.70259781737909], [-21.536188316335807, -64.70474283312046],
@@ -134,27 +138,30 @@
             }
         ];
 
+        // Controladores globales
         let idSeguimientoGPS = null;
         let marcadorGPSUsuario = null;
         let circuloPrecisionGPS = null;
+        let lineaHistorialCaminata = null; // Línea segmentada del usuario
+        let puntosCaminados = [];
         let esPrimerCentradoGPS = true;
+        let rutaSeleccionadaId = null;
 
-        // Estilos para marcadores de Leaflet
+        // Marcadores estéticos
         const crearIconoParada = (color) => L.divIcon({
-            html: `<div class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-lg text-white text-[10px] font-bold" style="background-color: ${color}">🚏</div>`,
+            html: `<div class="w-6 h-6 rounded-full border-2 border-gray-800 flex items-center justify-center shadow-2xl text-white text-[10px] font-black" style="background-color: ${color}">🚏</div>`,
             className: '', iconSize: [24, 24], iconAnchor: [12, 12]
         });
 
-        const iconoGPSAzul = L.divIcon({
+        const iconoGPSEmeralda = L.divIcon({
             html: `<div class="gps-pulso"></div>`,
-            className: '', iconSize: [14, 14], iconAnchor: [7, 7]
+            className: '', iconSize: [16, 16], iconAnchor: [8, 8]
         });
 
-        // 3. Mecánica para visualizar / ocultar el menú lateral
+        // Abrir y cerrar menú lateral
         function toggleMenuLateral(abrir) {
             const menu = document.getElementById('menu-lateral');
             const capa = document.getElementById('capa-oscura');
-
             if (abrir) {
                 menu.classList.remove('-translate-x-full');
                 capa.classList.remove('hidden');
@@ -166,21 +173,20 @@
             }
         }
 
-        // 4. Renderizar las rutas dentro del menú lateral
+        // Renderizar lista en interfaz
         function actualizarListaRutas() {
             const contenedor = document.getElementById('lista-rutas-usuario');
             contenedor.innerHTML = '';
-
             sistemaRutasGlobal.forEach(ruta => {
                 const itemHTML = `
-                    <div class="p-3.5 bg-gray-50 rounded-xl border border-gray-200 active:bg-gray-100 flex items-center justify-between transition shadow-2xs">
-                        <label class="flex items-center cursor-pointer flex-grow py-1 select-none">
-                            <input type="checkbox" class="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-0 cursor-pointer" onchange="toggleVisualizacionRuta('${ruta.id}', this.checked)">
-                            <span class="w-4 h-4 rounded-full ml-3 mr-2.5 shrink-0" style="background-color: ${ruta.color}"></span>
-                            <span class="font-bold text-gray-800 text-base">${ruta.nombre}</span>
+                    <div class="p-3.5 bg-gray-700/50 rounded-xl border border-gray-700 flex items-center justify-between transition shadow-md">
+                        <label class="flex items-center cursor-pointer flex-grow py-1 select-none text-gray-200">
+                            <input type="radio" name="ruta-unica" class="w-5 h-5 text-emerald-500 bg-gray-800 border-gray-600 focus:ring-0 cursor-pointer" onchange="seleccionarRutaExclusiva('${ruta.id}')">
+                            <span class="w-3.5 h-3.5 rounded-full ml-3 mr-2.5 shrink-0" style="background-color: ${ruta.color}"></span>
+                            <span class="font-bold text-sm text-gray-200">${ruta.nombre}</span>
                         </label>
-                        <span class="text-xs bg-gray-200 text-gray-700 font-bold px-2.5 py-1 rounded-full shrink-0">
-                            🚏 ${ruta.paradas.length}
+                        <span class="text-[10px] bg-gray-900 text-emerald-400 font-mono px-2 py-0.5 rounded border border-gray-700">
+                            🚏 ${ruta.paradas.length} P.
                         </span>
                     </div>
                 `;
@@ -188,89 +194,114 @@
             });
         }
 
-        // 5. Manejar el encendido / apagado de capas geométricas en el mapa
-        function toggleVisualizacionRuta(idRuta, visible) {
-            const ruta = sistemaRutasGlobal.find(r => r.id === idRuta);
-            if (!ruta) return;
-
-            if (visible) {
-                if (!ruta.capaLinea) {
-                    ruta.capaLinea = L.polyline(ruta.trazado, { color: ruta.color, weight: 6, opacity: 0.85 });
-                    ruta.grupoParadas = L.layerGroup();
-                    ruta.paradas.forEach((pos, i) => {
-                        L.marker(pos, { icon: crearIconoParada(ruta.color) })
-                         .bindPopup(`<b>${ruta.nombre}</b><br>Parada N° ${i + 1}`)
-                         .addTo(ruta.grupoParadas);
-                    });
-                }
-                ruta.capaLinea.addTo(map);
-                ruta.grupoParadas.addTo(map);
-                
-                // Cierra la barra lateral automáticamente al tickear para ver la ruta limpia
-                toggleMenuLateral(false);
-                
-                map.fitBounds(ruta.capaLinea.getBounds());
-            } else {
+        // Mostrar solo una ruta a la vez para poder computar distancias limpiamente
+        function seleccionarRutaExclusiva(idRuta) {
+            rutaSeleccionadaId = idRuta;
+            
+            sistemaRutasGlobal.forEach(ruta => {
                 if (ruta.capaLinea) map.removeLayer(ruta.capaLinea);
                 if (ruta.grupoParadas) map.removeLayer(ruta.grupoParadas);
+            });
+
+            const rutaActiva = sistemaRutasGlobal.find(r => r.id === idRuta);
+            if (rutaActiva) {
+                rutaActiva.capaLinea = L.polyline(rutaActiva.trazado, { color: rutaActiva.color, weight: 6, opacity: 0.9 });
+                rutaActiva.grupoParadas = L.layerGroup();
+                
+                rutaActiva.paradas.forEach((pos, i) => {
+                    L.marker(pos, { icon: crearIconoParada(rutaActiva.color) })
+                     .bindPopup(`<b class="text-gray-900">${rutaActiva.nombre}</b><br><span class="text-gray-600 text-xs">Punto de abordaje N° ${i + 1}</span>`)
+                     .addTo(rutaActiva.grupoParadas);
+                });
+
+                rutaActiva.capaLinea.addTo(map);
+                rutaActiva.grupoParadas.addTo(map);
+                map.fitBounds(rutaActiva.capaLinea.getBounds(), { padding: [30, 30] });
+            }
+            toggleMenuLateral(false);
+            
+            // Forzar recálculo matemático si el GPS está encendido
+            if (marcadorGPSUsuario) {
+                calcularMetricasDeCercania(marcadorGPSUsuario.getLatLng().lat, marcadorGPSUsuario.getLatLng().lng);
             }
         }
 
-        // 6. Importar nuevas rutas extras desde ficheros .json externos
-        function importarNuevasRutasJSON(event) {
-            const archivo = event.target.files[0];
-            if (!archivo) return;
+        // FÓRMULA MATEMÁTICA DE HAVERSINE: Calcula distancia exacta en línea recta sobre la tierra
+        function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Radio de la tierra en metros
+            const phi1 = lat1 * Math.PI / 180;
+            const phi2 = lat2 * Math.PI / 180;
+            const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+            const deltaLambda = (lon2 - lon1) * Math.PI / 180;
 
-            const lector = new FileReader();
-            lector.onload = function(e) {
-                try {
-                    const datos = JSON.parse(e.target.result);
-                    const arreglo = Array.isArray(datos) ? datos : [datos];
-                    let nuevosAgregados = 0;
+            const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+                      Math.cos(phi1) * Math.cos(phi2) *
+                      Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-                    arreglo.forEach(r => {
-                        if (r.nombre && r.trazado) {
-                            const existe = sistemaRutasGlobal.some(e => e.id === r.id);
-                            sistemaRutasGlobal.push({
-                                id: existe || !r.id ? 'linea_' + Date.now() + Math.random() : r.id,
-                                nombre: r.nombre, color: r.color || '#10b981',
-                                trazado: r.trazado, paradas: r.paradas || [],
-                                capaLinea: null, grupoParadas: null
-                            });
-                            nuevosAgregados++;
-                        }
-                    });
-
-                    if(nuevosAgregados > 0) {
-                        actualizarListaRutas();
-                        alert(`¡Éxito! Se añadieron ${nuevosAgregados} rutas.`);
-                    }
-                } catch (error) { alert("Archivo JSON no compatible."); }
-            };
-            lector.readAsText(archivo);
-            event.target.value = '';
+            return R * c; // Retorna metros
         }
 
-        // 7. Rastreo GPS Satelital
+        // Lógica de telemetría en tiempo real
+        function calcularMetricasDeCercania(userLat, userLng) {
+            const panelTxt = document.getElementById('telemetria-distancia');
+            if (!rutaSeleccionadaId) {
+                panelTxt.innerHTML = "⚠️ GPS conectado. Selecciona una línea en el menú para medir distancias.";
+                return;
+            }
+
+            const rutaActiva = sistemaRutasGlobal.find(r => r.id === rutaSeleccionadaId);
+            if (!rutaActiva || rutaActiva.paradas.length === 0) return;
+
+            let distanciaMinima = Infinity;
+            let indiceParadaCercana = 0;
+
+            rutaActiva.paradas.forEach((parada, index) => {
+                const d = calcularDistanciaMetros(userLat, userLng, parada[0], parada[1]);
+                if (d < distanciaMinima) {
+                    distanciaMinima = d;
+                    indiceParadaCercana = index;
+                }
+            });
+
+            const distFijada = Math.round(distanciaMinima);
+
+            // Acción de Alerta Dinámica (Geofencing a menos de 50 metros)
+            if (distFijada <= 50) {
+                panelTxt.innerHTML = `<div class="bg-emerald-950 text-emerald-400 p-2 rounded border border-emerald-500 font-bold animate-pulse text-center">🎉 ¡Estás en la parada N° ${indiceParadaCercana + 1}! Espera al micro aquí.</div>`;
+            } else {
+                panelTxt.innerHTML = `🏁 Estás siguiendo la ruta de: <b>${rutaActiva.nombre}</b>.<br>🚏 La parada más cercana (N° ${indiceParadaCercana + 1}) se encuentra a unos <span class="text-emerald-400 font-bold text-sm">${distFijada} metros</span> de tu posición actual.`;
+            }
+        }
+
+        // Encendido del Rastreador Satelital Nativo de GitHub Pages
         function alternarLocalizacionGPS() {
             const botonGps = document.getElementById('btn-gps');
+            const indicadorBarra = document.getElementById('estado-gps-barra');
 
             if (idSeguimientoGPS !== null) {
                 navigator.geolocation.clearWatch(idSeguimientoGPS);
                 idSeguimientoGPS = null;
+                
                 if (marcadorGPSUsuario) map.removeLayer(marcadorGPSUsuario);
                 if (circuloPrecisionGPS) map.removeLayer(circuloPrecisionGPS);
-                marcadorGPSUsuario = null; circuloPrecisionGPS = null;
-                botonGps.classList.remove('bg-blue-100', 'text-blue-600', 'border-blue-400');
+                if (lineaHistorialCaminata) map.removeLayer(lineaHistorialCaminata);
+                
+                marcadorGPSUsuario = null; circuloPrecisionGPS = null; lineaHistorialCaminata = null;
+                puntosCaminados = [];
+                
+                botonGps.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-400');
+                indicadorBarra.innerHTML = `📡 GPS: <span class="text-red-400 font-bold">Inactivo</span>`;
                 return;
             }
 
             if (!navigator.geolocation) {
-                alert("GPS no soportado.");
+                alert("Este hardware no tiene soporte de geolocalización.");
                 return;
             }
 
-            botonGps.classList.add('bg-blue-100', 'text-blue-600', 'border-blue-400');
+            botonGps.classList.add('bg-emerald-600', 'text-white', 'border-emerald-400');
+            indicadorBarra.innerHTML = `📡 GPS: <span class="text-yellow-400 font-bold">Sincronizando...</span>`;
             esPrimerCentradoGPS = true;
 
             idSeguimientoGPS = navigator.geolocation.watchPosition(
@@ -279,30 +310,69 @@
                     const lng = pos.coords.longitude;
                     const precision = pos.coords.accuracy;
 
+                    indicadorBarra.innerHTML = `📡 GPS: <span class="text-emerald-400 font-bold">En Vivo (±${Math.round(precision)}m)</span>`;
+
+                    // Almacenar ruta recorrida por el pasajero
+                    puntosCaminados.push([lat, lng]);
+
                     if (!marcadorGPSUsuario) {
-                        marcadorGPSUsuario = L.marker([lat, lng], { icon: iconoGPSAzul }).addTo(map);
-                        circuloPrecisionGPS = L.circle([lat, lng], { radius: precision, color: '#2563eb', weight: 1, fillColor: '#2563eb', fillOpacity: 0.15 }).addTo(map);
+                        marcadorGPSUsuario = L.marker([lat, lng], { icon: iconoGPSEmeralda }).addTo(map);
+                        circuloPrecisionGPS = L.circle([lat, lng], { radius: precision, color: '#10b981', weight: 1, fillColor: '#10b981', fillOpacity: 0.1 }).addTo(map);
+                        lineaHistorialCaminata = L.polyline(puntosCaminados, { color: '#ffffff', weight: 3, dashArray: '6, 8', opacity: 0.6 }).addTo(map);
                     } else {
                         marcadorGPSUsuario.setLatLng([lat, lng]);
                         circuloPrecisionGPS.setLatLng([lat, lng]);
                         circuloPrecisionGPS.setRadius(precision);
+                        lineaHistorialCaminata.setLatLngs(puntosCaminados);
                     }
+
+                    // Calcular lógica matemática de proximidad
+                    calcularMetricasDeCercania(lat, lng);
 
                     if (esPrimerCentradoGPS) {
                         map.setView([lat, lng], 16);
                         esPrimerCentradoGPS = false;
                     }
                 },
-                function() {
-                    alert("Aviso GPS: Para que el GPS rastree tu ubicación en la calle, el archivo debe subirse a internet usando un servidor seguro con HTTPS (como GitHub Pages).");
-                    botonGps.classList.remove('bg-blue-100', 'text-blue-600', 'border-blue-400');
+                function(error) {
+                    console.log(error);
+                    alert("Asegúrate de encender el interruptor de 'Ubicación' de tu teléfono y permitir el acceso al navegador.");
+                    botonGps.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-400');
+                    indicadorBarra.innerHTML = `📡 GPS: <span class="text-red-400 font-bold">Error de hardware</span>`;
                     idSeguimientoGPS = null;
                 },
-                { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+                { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
             );
         }
 
-        // Carga Inicial automática
+        // Subida dinámica complementaria
+        function importarNuevasRutasJSON(event) {
+            const archivo = event.target.files[0];
+            if (!archivo) return;
+            const lector = new FileReader();
+            lector.onload = function(e) {
+                try {
+                    const datos = JSON.parse(e.target.result);
+                    const arreglo = Array.isArray(datos) ? datos : [datos];
+                    arreglo.forEach(r => {
+                        if (r.nombre && r.trazado) {
+                            sistemaRutasGlobal.push({
+                                id: 'linea_' + Date.now() + Math.random(),
+                                nombre: r.nombre, color: r.color || '#34d399',
+                                trazado: r.trazado, paradas: r.paradas || [],
+                                capaLinea: null, grupoParadas: null
+                            });
+                        }
+                    });
+                    actualizarListaRutas();
+                    alert("Variaciones de ruta inyectadas correctamente.");
+                } catch (er) { alert("Formato JSON inválido."); }
+            };
+            lector.readAsText(archivo);
+            event.target.value = '';
+        }
+
+        // Inicialización
         actualizarListaRutas();
     </script>
 </body>
