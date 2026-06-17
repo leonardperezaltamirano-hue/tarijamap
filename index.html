@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Villazón Rutas Pro - GPS Activo</title>
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     
+    <!-- Leaflet CSS y JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -30,6 +32,7 @@
 </head>
 <body class="bg-gray-900 text-gray-100 font-sans overflow-hidden">
 
+    <!-- BARRA SUPERIOR -->
     <nav class="bg-gray-800 h-16 px-3 sm:px-4 flex items-center justify-between shadow-lg z-30 relative border-b border-gray-700 gap-2">
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
             <button onclick="toggleMenuLateral(true)" class="bg-gray-700 hover:bg-gray-600 text-white p-2 rounded-xl text-xl transition active:scale-95 cursor-pointer" title="Abrir menú">
@@ -40,6 +43,7 @@
             </h1>
         </div>
 
+        <!-- CONTROLES SUPERIORES -->
         <div class="flex items-center gap-1.5 sm:gap-2">
             <div class="bg-gray-900 p-1 rounded-xl border border-gray-700 flex shadow-inner">
                 <button id="btn-mapa-urbano" onclick="cambiarEstiloMapa('urbano')" class="text-[11px] sm:text-xs font-bold px-2 sm:px-3 py-1.5 rounded-lg bg-gray-700 text-emerald-400 transition cursor-pointer">
@@ -60,8 +64,10 @@
         </div>
     </nav>
 
+    <!-- CONTENEDOR PRINCIPAL -->
     <div class="relative flex alto-pantalla w-full overflow-hidden">
         
+        <!-- MENU LATERAL -->
         <aside id="menu-lateral" class="absolute top-0 bottom-0 left-0 w-72 md:w-80 bg-gray-800 shadow-2xl z-40 flex flex-col transition-transform duration-300 transform -translate-x-full border-r border-gray-700">
             <div class="p-4 border-b border-gray-700 bg-gray-850 flex items-center justify-between">
                 <div>
@@ -71,9 +77,12 @@
                 <button onclick="toggleMenuLateral(false)" class="text-gray-400 hover:text-white text-xl p-1 rounded-lg cursor-pointer">✕</button>
             </div>
 
+            <!-- Lista de Rutas -->
             <div id="lista-rutas-usuario" class="p-4 flex-grow overflow-y-auto space-y-3 bg-gray-800">
-                </div>
+                <!-- Inyección JS -->
+            </div>
 
+            <!-- Panel de telemetría interna -->
             <div class="p-4 bg-gray-900 border-t border-gray-700 space-y-2">
                 <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest block">Asistente de Cercanía</span>
                 <div id="telemetria-distancia" class="text-xs text-gray-300 bg-gray-800 p-2.5 rounded-lg border border-gray-700 italic">
@@ -81,24 +90,37 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN EXCLUSIVA DE ADMINISTRACIÓN -->
             <div class="p-4 bg-gray-850 border-t border-gray-700 space-y-3 max-h-[50vh] overflow-y-auto">
+                <!-- Botón de Acceso Principal -->
                 <button id="btn-login-admin" onclick="solicitarAccesoAdministrador()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2 border border-gray-600 cursor-pointer shadow-md">
                     🔒 Admin
                 </button>
 
+                <!-- Panel de herramientas Admin -->
                 <div id="panel-herramientas-admin" class="hidden space-y-3">
                     <div class="flex items-center justify-between bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/60">
                         <span class="text-[11px] text-emerald-400 font-bold">🔐 Modo Admin Activo</span>
                         <button onclick="cerrarSesionAdmin()" class="text-[10px] bg-gray-800 hover:bg-red-900/40 text-gray-400 hover:text-red-400 px-2 py-0.5 rounded border border-gray-700 transition cursor-pointer">Salir</button>
                     </div>
 
-                    <label class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-2 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-pointer text-center shadow border border-gray-600">
-                        📥 Cargar JSON
-                        <input type="file" accept=".json" class="hidden" onchange="importarNuevasRutasJSON(event)">
-                    </label>
+                    <!-- Controles globales de archivos -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <!-- Botón para importar JSON -->
+                        <label class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-2.5 px-2 rounded-xl text-[11px] transition flex items-center justify-center gap-1.5 cursor-pointer text-center shadow border border-gray-600">
+                            📥 Cargar JSON
+                            <input type="file" accept=".json" class="hidden" onchange="importarNuevasRutasJSON(event)">
+                        </label>
+
+                        <!-- NUEVO BOTÓN: Exportar toda la base de datos local -->
+                        <button onclick="exportarTodasLasRutasGlobales()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-2 rounded-xl text-[11px] transition flex items-center justify-center gap-1.5 cursor-pointer text-center shadow border border-blue-500">
+                            📦 Exportar Todo
+                        </button>
+                    </div>
 
                     <hr class="border-gray-700 my-2">
 
+                    <!-- SECCIÓN DE DIBUJO DE RUTA -->
                     <div class="bg-gray-900 p-3 rounded-xl border border-gray-700 space-y-2">
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">✍️ Diseñador de Líneas</span>
                         
@@ -114,27 +136,31 @@
                                 <input id="input-dibujo-color" type="color" value="#eab308" class="w-full h-8 bg-transparent border-0 cursor-pointer rounded">
                             </div>
 
-                            <button id="btn-estado-dibujo" onclick="iniciarCapturaDibujo()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 px-3 rounded-lg text-xs transition cursor-pointer">
+                            <!-- CONTROL PRINCIPAL DE ESTADO -->
+                            <button id="btn-estado-dibujo" onclick="iniciarCaptureDibujo()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-2 px-3 rounded-lg text-xs transition cursor-pointer">
                                 🚀 Iniciar Dibujo
                             </button>
 
+                            <!-- Instrucciones Dinámicas -->
                             <div id="instrucciones-dibujo" class="hidden text-[10px] text-gray-400 bg-gray-950 p-2 rounded border border-gray-800 space-y-1">
                                 <p class="text-yellow-400 font-bold">💡 Controles en el mapa:</p>
                                 <p>• <b>Click simple:</b> Agrega punto de trazado.</p>
                                 <p>• <b>Shift + Click:</b> Agrega una parada 🚏.</p>
                             </div>
 
+                            <!-- Acciones de edición rápida -->
                             <div id="acciones-dibujo-edicion" class="hidden grid grid-cols-2 gap-1.5">
                                 <button onclick="deshacerUltimoPunto('trazado')" class="bg-gray-800 hover:bg-gray-700 text-gray-300 py-1 px-2 rounded text-[10px] border border-gray-700 cursor-pointer">↩️ Borrar Línea</button>
                                 <button onclick="deshacerUltimoPunto('parada')" class="bg-gray-800 hover:bg-gray-700 text-gray-300 py-1 px-2 rounded text-[10px] border border-gray-700 cursor-pointer">↩️ Borrar Parada</button>
                             </div>
 
+                            <!-- PANEL DE CONTROLES FINALES AL DIBUJAR -->
                             <div id="bloque-guardar-admin" class="hidden flex flex-col gap-1.5 pt-1 border-t border-gray-800 mt-2">
                                 <button onclick="guardarRutaEnSistemaLocal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs transition cursor-pointer shadow-md flex items-center justify-center gap-1">
                                     ✅ Terminar y Guardar Ruta
                                 </button>
-                                <button onclick="exportarRutaDibujadaAJSON()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-3 rounded-lg text-xs transition cursor-pointer shadow-md text-center">
-                                    💾 Exportar a .JSON
+                                <button onclick="exportarRutaDibujadaAJSON()" class="w-full bg-blue-600/70 hover:bg-blue-500 text-white font-bold py-2 px-3 rounded-lg text-xs transition cursor-pointer shadow-md text-center">
+                                    💾 Exportar Solo Esta Ruta
                                 </button>
                                 <button onclick="desactivarModoDibujoCompleto(true)" class="w-full bg-red-700/40 hover:bg-red-600 text-red-300 hover:text-white py-1 px-3 rounded-lg text-[10px] transition cursor-pointer text-center">
                                     ❌ Descartar Dibujo
@@ -146,8 +172,10 @@
             </div>
         </aside>
 
+        <!-- Capa Oscura Ocultadora -->
         <div id="capa-oscura" onclick="toggleMenuLateral(false)" class="absolute inset-0 bg-black/60 z-30 hidden transition-opacity duration-300 opacity-0"></div>
 
+        <!-- EL MAPA INTERACTIVO -->
         <div id="map" class="z-10 flex-grow w-full h-full relative bg-gray-200"></div>
 
     </div>
@@ -164,7 +192,7 @@
 
         capaUrbana.addTo(map);
         let estiloMapaActual = 'urbano';
-        let isAdminAutenticado = false; // Variable para controlar visibilidad de herramientas de eliminación
+        let isAdminAutenticado = false; 
 
         function cambiarEstiloMapa(estilo) {
             const btnUrbano = document.getElementById('btn-mapa-urbano');
@@ -180,7 +208,7 @@
             }
         }
 
-        // Base de Datos de Rutas en Villazón (Inicialmente vacía para ser creadas/importadas)
+        // Base de Datos de Rutas en Villazón
         let sistemaRutasGlobal = [
             {
                 "id": "ejemplo_villazon", "nombre": "Línea 1 Ejemplo", "color": "#10b981",
@@ -232,7 +260,7 @@
                 isAdminAutenticado = true;
                 document.getElementById('btn-login-admin').classList.add('hidden');
                 document.getElementById('panel-herramientas-admin').classList.remove('hidden');
-                actualizarListaRutas(); // Refrescar lista para inyectar botones de borrar
+                actualizarListaRutas(); 
                 alert("Autenticación correcta. Módulo administrativo habilitado.");
             } else if (passwordCargada !== null) {
                 alert("Contraseña errónea. Acceso restringido.");
@@ -245,21 +273,15 @@
             mostrarFormularioDibujo(false);
             document.getElementById('panel-herramientas-admin').classList.add('hidden');
             document.getElementById('btn-login-admin').classList.remove('hidden');
-            actualizarListaRutas(); // Quitar botones de borrar en la vista común
+            actualizarListaRutas(); 
         }
 
-        // ELIMINAR RUTA (Añadido a petición)
         function eliminarRutaDelSistema(idRuta, nombreRuta) {
-            const confirmar = confirm(`¿Estás completamente seguro de que deseas eliminar la "${nombreRuta}" del mapa y de la lista?`);
+            const confirmar = confirm(`¿Estás completamente seguro de que deseas eliminar la "${nombreRuta}"?`);
             if (!confirmar) return;
 
-            // Desactivar visualmente del mapa primero si está encendida
             alternarVisualizacionDeRutaMultiple(idRuta, false);
-
-            // Filtrar de la base de datos
             sistemaRutasGlobal = sistemaRutasGlobal.filter(r => r.id !== idRuta);
-            
-            // Re-renderizar la lista
             actualizarListaRutas();
         }
 
@@ -269,7 +291,7 @@
             document.getElementById('form-crear-ruta').style.display = mostrar ? 'block' : 'none';
         }
 
-        function iniciarCapturaDibujo() {
+        function iniciarCaptureDibujo() {
             const inputNom = document.getElementById('input-dibujo-nombre').value.trim();
             const inputCol = document.getElementById('input-dibujo-color').value;
 
@@ -379,26 +401,48 @@
                 paradas: datosRutaNueva.paradas
             };
 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(estructuraExportar, null, 2));
+            descargarArchivoJSON(estructuraExportar, datosRutaNueva.nombre);
+            guardarRutaEnSistemaLocal();
+        }
+
+        // NUEVA FUNCIÓN: EXPORTAR TODAS LAS RUTAS ALMACENADAS EN UN SOLO ARCHIVO
+        function exportarTodasLasRutasGlobales() {
+            if (sistemaRutasGlobal.length === 0) {
+                alert("No hay rutas almacenadas en el sistema para exportar.");
+                return;
+            }
+
+            // Limpiamos los campos 'capaLinea' y 'grupoParadas' del JSON final para que sea ligero e impecable
+            const baseLimpiaExportar = sistemaRutasGlobal.map(ruta => ({
+                nombre: ruta.nombre,
+                color: ruta.color,
+                trazado: ruta.trazado,
+                paradas: ruta.paradas
+            }));
+
+            descargarArchivoJSON(baseLimpiaExportar, "respaldo_rutas_villazon");
+            alert(`📦 Copia de seguridad generada de manera exitosa con ${baseLimpiaExportar.length} ruta(s).`);
+        }
+
+        // Función auxiliar genérica de descarga
+        function descargarArchivoJSON(objetoData, prefijoNombre) {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(objetoData, null, 2));
             const nodoDescarga = document.createElement('a');
             nodoDescarga.setAttribute("href", dataStr);
-            const nombreArchivo = datosRutaNueva.nombre.toLowerCase().replace(/[^a-z0-9]/g, "_") + ".json";
+            const nombreArchivo = prefijoNombre.toLowerCase().replace(/[^a-z0-9]/g, "_") + ".json";
             nodoDescarga.setAttribute("download", nombreArchivo);
             document.body.appendChild(nodoDescarga);
             nodoDescarga.click();
             nodoDescarga.remove();
-
-            guardarRutaEnSistemaLocal();
         }
 
-        // RENDERIZADO DE LA LISTA LATERAL (INCLUYE BOTÓN ELIMINAR SI ES ADMIN)
+        // RENDERIZADO DE LA LISTA LATERAL
         function actualizarListaRutas() {
             const contenedor = document.getElementById('lista-rutas-usuario');
             contenedor.innerHTML = '';
             sistemaRutasGlobal.forEach(ruta => {
                 const checked = rutasActivasSeleccionadas.includes(ruta.id) ? 'checked' : '';
                 
-                // Si es admin inyectamos el botón de eliminar ruta
                 const botonEliminarHTML = isAdminAutenticado 
                     ? `<button onclick="eliminarRutaDelSistema('${ruta.id}', '${ruta.nombre}')" class="ml-2 bg-red-950 hover:bg-red-600 text-red-400 hover:text-white p-2 rounded-lg border border-red-900/60 transition cursor-pointer text-xs" title="Eliminar Ruta">🗑️</button>` 
                     : '';
